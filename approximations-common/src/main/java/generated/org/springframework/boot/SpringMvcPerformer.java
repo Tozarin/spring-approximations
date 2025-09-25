@@ -2,11 +2,9 @@ package generated.org.springframework.boot;
 
 import generated.org.springframework.boot.pinnedValues.PinnedValueSource;
 import generated.org.springframework.boot.pinnedValues.PinnedValueStorage;
-import generated.org.springframework.security.SecurityContextImplImpl;
 import jakarta.servlet.http.Cookie;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockHttpServletResponse;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,7 +16,6 @@ import org.usvm.spring.api.SpringEngine;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,6 +23,7 @@ import static generated.org.springframework.boot.pinnedValues.PinnedValueSource.
 import static generated.org.springframework.boot.pinnedValues.PinnedValueSource.RESOLVED_EXCEPTION_CLASS;
 import static generated.org.springframework.boot.pinnedValues.PinnedValueSource.RESOLVED_EXCEPTION_MESSAGE;
 import static generated.org.springframework.boot.pinnedValues.PinnedValueSource.UNHANDLED_EXCEPTION_CLASS;
+import static generated.org.springframework.boot.pinnedValues.PinnedValueSource.UNHANDLED_EXCEPTION_MESSAGE;
 import static generated.org.springframework.boot.pinnedValues.PinnedValueSource.VIEW_NAME;
 import static generated.org.springframework.boot.pinnedValues.PinnedValueStorage.getPinnedValue;
 import static generated.org.springframework.boot.pinnedValues.PinnedValueStorage.writePinnedValue;
@@ -69,7 +67,10 @@ public class SpringMvcPerformer {
                 writeResult(result);
                 SpringUtils.internalLog("[USVM] end of path analysis", path);
             } catch (Throwable e) {
-                writePinnedValue(UNHANDLED_EXCEPTION_CLASS, e.getClass());
+                Throwable root = e;
+                while (root.getCause() != null) root = root.getCause();
+                writePinnedValue(UNHANDLED_EXCEPTION_CLASS, root.getClass());
+                writePinnedValue(UNHANDLED_EXCEPTION_MESSAGE, root.getMessage());
                 SpringUtils.internalLog("[USVM] analysis finished with exception", path);
             } finally {
                 if (securityEnabled && getPinnedValue(REQUEST_USER, UserDetails.class) == null)
@@ -110,10 +111,8 @@ public class SpringMvcPerformer {
         Throwable resolvedException = result.getResolvedException();
 
         if (resolvedException != null) {
-            String message = resolvedException.getMessage();
-            if (message != null)
-                writePinnedValue(RESOLVED_EXCEPTION_MESSAGE, message);
             writePinnedValue(RESOLVED_EXCEPTION_CLASS, resolvedException.getClass());
+            writePinnedValue(RESOLVED_EXCEPTION_MESSAGE, resolvedException.getMessage());
         }
 
         ModelAndView mav = result.getModelAndView();

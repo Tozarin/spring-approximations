@@ -10,7 +10,6 @@ import org.usvm.spring.api.SpringEngine;
 
 @Approximate(DigitsValidatorForCharSequence.class)
 public class DigitsValidatorForCharSequenceImpl {
-    public static final int MAX_LENGTH = 10;
 
     private int maxIntegerLength;
     private int maxFractionLength;
