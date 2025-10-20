@@ -24,17 +24,15 @@ public class TableTracker {
 
         if (ix == -1) {
             tablesNames.add(tableName);
-
-            if (entityIx != 0) SpringEngine.println("[DB Warning] Unexpected index in tryTrack");
             lastIxs.add(entityIx);
             track(tableName, value, type, entityIx);
             return;
         }
 
-        int oldEntityIX = lastIxs.get(ix);
-        if (oldEntityIX >= entityIx) return;
+        int oldEntityIx = lastIxs.get(ix);
+        if (oldEntityIx >= entityIx) return;
 
-        if (entityIx != oldEntityIX + 1) SpringEngine.println("[DB Warning] Unexpected entity index in tryTrack");
+        if (entityIx != oldEntityIx + 1) SpringEngine.println("[DB Warning] Unexpected entity index in tryTrack");
 
         lastIxs.remove(ix);
         lastIxs.add(ix, entityIx);
