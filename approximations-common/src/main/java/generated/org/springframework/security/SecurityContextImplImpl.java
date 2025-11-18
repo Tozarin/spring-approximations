@@ -2,7 +2,6 @@ package generated.org.springframework.security;
 
 import generated.org.springframework.boot.SymbolicValueFactory;
 import generated.org.springframework.boot.pinnedValues.PinnedValueSource;
-import org.apache.commons.logging.Log;
 import org.jacodb.approximation.annotation.Approximate;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -68,11 +67,11 @@ public class SecurityContextImplImpl {
             Class<?> fieldType = field.getType();
             field.setAccessible(true);
             if (Set.class == fieldType) {
-                Object set = SymbolicValueFactory.createSymbolic(HashSet.class, false);
+                Object set = SymbolicValueFactory.createSymbolic(HashSet.class, false, false);
                 Engine.assume(((HashSet<?>) set).size() < 4);
                 field.set(user, set);
             } else if (Collection.class == fieldType) {
-                Object arrayList = SymbolicValueFactory.createSymbolic(ArrayList.class, false);
+                Object arrayList = SymbolicValueFactory.createSymbolic(ArrayList.class, false, false);
                 Engine.assume(((ArrayList<?>) arrayList).size() < 4);
                 field.set(user, arrayList);
             } else {
@@ -109,7 +108,7 @@ public class SecurityContextImplImpl {
 
     private static Authentication getSymbolicAuthentication() {
         Class<? extends UserDetails> userClass = _getUserClass();
-        UserDetails user = Engine.makeSymbolicSubtype(userClass);
+        UserDetails user = Engine.makeKotlinSymbolicSubtype(userClass);
         assumeUserInvariants(user, userClass);
         writePinnedValue(PinnedValueSource.REQUEST_USER, user);
 

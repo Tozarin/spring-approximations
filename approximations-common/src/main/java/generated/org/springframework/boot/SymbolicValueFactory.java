@@ -22,7 +22,13 @@ public class SymbolicValueFactory {
     }
 
     public static Object createValidSymbolic(Class<?> type, boolean nullable) {
-        Object result = SymbolicValueFactory.createSymbolic(type, nullable);
+        Object result = SymbolicValueFactory.createSymbolic(type, nullable, false);
+        validateInputValue(result);
+        return result;
+    }
+
+    public static Object createValidKotlinSymbolic(Class<?> type, boolean nullable) {
+        Object result = SymbolicValueFactory.createSymbolic(type, nullable, true);
         validateInputValue(result);
         return result;
     }
@@ -56,27 +62,37 @@ public class SymbolicValueFactory {
         else SpringEngine.markAsGoodPath();
     }
 
-    private static Object createSymbolicWithSameType(Class<?> type, boolean makeNullable) {
+    private static Object createSymbolicWithSameType(
+            Class<?> type,
+            boolean makeNullable,
+            boolean assumeKotlinNullables
+    ) {
         if (makeNullable) {
-            Object value = Engine.makeNullableSymbolic(type);
+            Object value =
+                    assumeKotlinNullables
+                            ? Engine.makeNullableKotlinSymbolic(type)
+                            : Engine.makeNullableSymbolic(type);
             prioritizeNull(value);
             return value;
         }
 
-        return Engine.makeSymbolic(type);
+        return assumeKotlinNullables ? Engine.makeKotlinSymbolic(type) : Engine.makeSymbolic(type);
     }
 
-    private static Object createSymbolicSubtype(Class<?> type, boolean makeNullable) {
+    private static Object createSymbolicSubtype(Class<?> type, boolean makeNullable, boolean assumeKotlinNullables) {
         if (makeNullable) {
-            Object value = Engine.makeNullableSymbolicSubtype(type);
+            Object value =
+                    assumeKotlinNullables
+                            ? Engine.makeNullableKotlinSymbolicSubtype(type)
+                            : Engine.makeNullableSymbolicSubtype(type);
             prioritizeNull(value);
             return value;
         }
 
-        return Engine.makeSymbolicSubtype(type);
+        return assumeKotlinNullables ? Engine.makeKotlinSymbolicSubtype(type) : Engine.makeSymbolicSubtype(type);
     }
 
-    public static Object createSymbolic(Class<?> type, boolean makeNullable) {
+    public static Object createSymbolic(Class<?> type, boolean makeNullable, boolean assumeKotlinNullables) {
         if (type == boolean.class)
             return Engine.makeSymbolicBoolean();
         if (type == int.class)
@@ -97,15 +113,15 @@ public class SymbolicValueFactory {
 
         if (type.isInterface() || Modifier.isAbstract(type.getModifiers())) {
             if (type.isAssignableFrom(ArrayList.class))
-                return createSymbolicWithSameType(ArrayList.class, makeNullable);
+                return createSymbolicWithSameType(ArrayList.class, makeNullable, assumeKotlinNullables);
             if (type.isAssignableFrom(HashSet.class))
-                return createSymbolicWithSameType(HashSet.class, makeNullable);
+                return createSymbolicWithSameType(HashSet.class, makeNullable, assumeKotlinNullables);
             if (type.isAssignableFrom(HashMap.class))
-                return createSymbolicWithSameType(HashMap.class, makeNullable);
+                return createSymbolicWithSameType(HashMap.class, makeNullable, assumeKotlinNullables);
 
-            return createSymbolicSubtype(type, makeNullable);
+            return createSymbolicSubtype(type, makeNullable, assumeKotlinNullables);
         }
 
-        return createSymbolicWithSameType(type, makeNullable);
+        return createSymbolicWithSameType(type, makeNullable, assumeKotlinNullables);
     }
 }
