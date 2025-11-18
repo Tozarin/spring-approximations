@@ -98,7 +98,7 @@ public class BaseTable<T> extends ABaseTable<T> {
             return dataT;
         }
 
-        T t = Engine.makeSymbolic(entityType);
+        T t = Engine.makeKotlinSymbolic(entityType);
         Engine.assume(t != null);
 
         if (generatedId) setNewGeneratedId(t);
